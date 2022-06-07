@@ -1,0 +1,12 @@
+{
+  "info": {
+    "height": {
+      "address": 215,
+      "type": "<u2"
+    },
+    "lives": {
+      "address": 32,
+      "type": "|i1"
+    }
+  }
+}
