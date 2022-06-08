@@ -1,3 +1,5 @@
+from distutils.log import Log
+from tabnanny import check
 import retro
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 from stable_baselines3 import PPO
@@ -48,13 +50,13 @@ class IceClimber():
             reward = -2
         elif(info['height'] == self.height):
             reward = 0
-        elif(info["height"] == 3 and self.height3):
+        elif(info["height"] == 4 and self.height3):
             reward = 15
             self.height3 = False
-        elif(info["height"] == 6 and self.height6):
+        elif(info["height"] == 7 and self.height6):
             reward = 20
             self.height6 = False
-        elif(info["height"] > 8 and self.bonus):
+        elif(info["height"] > 9 and self.bonus): #omg i made him give up too early
             reward = 100
             self.bonus = False
         else:
@@ -130,19 +132,40 @@ def optimize_agent(trial):
         return -1000
 
 
-#implement callback somewhere here later
+#implement callback
+from stable_baselines3.common.callbacks import BaseCallback
+import os
+
+class LogCallback(BaseCallback):
+    def __init__(self, check_freq, save_path, verbose=1):
+        super(LogCallback,self).__init__(verbose)
+        self.check_freq = check_freq
+        self.save_path = save_path
+
+    def _init_callback(self):
+        if self.save_path is not None:
+            os.makedirs(self.save_path, exist_ok=True)
+    
+    def _on_step(self):
+        if self.n_calls % self.check_freq == 0:
+            model_path = os.path.join(self.save_path, f'bestmodel{self.n_calls}')
+            self.model.save(model_path)
+        return True
+
+
+
 
 if __name__ == "__main__":
     experiment = optuna.create_study(direction="maximize")
     experiment.optimize(optimize_agent,n_trials=10,n_jobs=1)
     model_params = experiment.best_params
     model_params["n_steps"] = math.floor(model_params["n_steps"] / 64) * 64 #needs to be div by 64
-
+    callback = LogCallback(check_freq=10000, save_path="./checkpoints/")
 
     env = IceClimber()
     env = DummyVecEnv([lambda:env])
     env = VecFrameStack(env,4,channels_order='last')
     model = PPO('CnnPolicy', env, verbose=1, **model_params)
     model.load('bestmodel')
-    model.learn(total_timesteps=100000)
+    model.learn(total_timesteps=200000,callback=callback)
     model.save('finalmodel')
