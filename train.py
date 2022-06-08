@@ -27,6 +27,11 @@ class IceClimber():
         self.action_space = MultiBinary(9)
         self.game = retro.make(game="IceClimber-Nes",state="Level1",use_restricted_actions=retro.Actions.FILTERED)
 
+        # for rewards
+        self.height3 = True
+        self.height6 = True
+        self.bonus = True
+
     def preprocess(self,observation):
         color = cv2.cvtColor(observation,cv2.COLOR_BGR2GRAY)
         resize = cv2.resize(color,(84,84),interpolation=cv2.INTER_CUBIC)
@@ -40,9 +45,18 @@ class IceClimber():
         self.previous_frame = obs
 
         if(info['height'] < self.height):
-            reward = -1
+            reward = -2
         elif(info['height'] == self.height):
             reward = 0
+        elif(info["height"] == 3 and self.height3):
+            reward = 15
+            self.height3 = False
+        elif(info["height"] == 6 and self.height6):
+            reward = 20
+            self.height6 = False
+        elif(info["height"] > 8 and self.bonus):
+            reward = 100
+            self.bonus = False
         else:
             reward = 1
         self.height = info['height']
