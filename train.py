@@ -39,7 +39,12 @@ class IceClimber():
         frame_delta = obs - self.previous_frame
         self.previous_frame = obs
 
-        reward = info['height'] - self.height
+        if(info['height'] < self.height):
+            reward = -1
+        elif(info['height'] == self.height):
+            reward = 0
+        else:
+            reward = 1
         self.height = info['height']
         return frame_delta, reward, done, info
     
