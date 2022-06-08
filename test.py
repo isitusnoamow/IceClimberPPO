@@ -1,22 +1,25 @@
 import retro
 from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 from stable_baselines3 import PPO
+from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.monitor import Monitor
+from train import IceClimber
 
 
-modelname = "IceClimberPPO"
+modelname = "finalmodel"
 gamename = "IceClimber-Nes"
 
-env = DummyVecEnv([lambda: retro.make(gamename, state="Level1",record="/recordings/")])
-model = PPO.load(modelname)
-model.set_env(env)
-obs = env.reset()
+env = IceClimber()
+env = Monitor(env, './logs/')
+env = DummyVecEnv([lambda:env])
+env = VecFrameStack(env,4,channels_order='last')
+model = PPO.load("finalmodel")
 done = False
-reward = 0
-
+obs = env.reset()
 while not done:
     env.render()
     actions, _ = model.predict(obs)
     obs, rew, done, info = env.step(actions)
-    reward += rew
 
-print(reward)
+env.close()
