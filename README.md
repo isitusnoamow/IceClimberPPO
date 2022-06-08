@@ -1,4 +1,3 @@
 # IceClimberPPO
 
-todo:
-fix the damn code
+todo:get stage 1 finished
