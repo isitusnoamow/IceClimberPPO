@@ -1,4 +1,4 @@
 # IceClimberPPO
 
 todo:
-tune the hyperparamaters
+fix the damn code
