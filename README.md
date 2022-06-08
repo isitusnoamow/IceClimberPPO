@@ -6,3 +6,4 @@ done so far:
 
 todo:
 * get stage 1 finished so train 10m or smth
+* get state of the other 31 stages
