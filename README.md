@@ -7,4 +7,4 @@ Stage 1 Works at 200k training steps
 
 <br/>
 
-Probably shouldve used docker
+Try it with `python3 test.py`
