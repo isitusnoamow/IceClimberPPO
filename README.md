@@ -1,9 +1,10 @@
 # IceClimberPPO
 
-done so far:
-* got height data address
-* ppo implement attempt
+Stage 1 Works at 200k training steps
+<p align="left">
+    <img src="demo/Stage1.gif" width="200">
+</p>
 
-todo:
-* get stage 1 finished so train 10m or smth
-* get state of the other 31 stages
+<br/>
+
+Probably shouldve used docker

@@ -17,7 +17,7 @@ gamename = "IceClimber-Nes"
 
 #creating env with cnn in mind
 class IceClimber():
-    def __init__(self):
+    def __init__(self, record=False):
         super().__init__()
         self.metadata = {
             'render.modes': ['human','rgb_array'],
@@ -27,7 +27,10 @@ class IceClimber():
         #220,240,3
         self.observation_space = Box(low=0,high=255,shape=(84,84,1),dtype=np.uint8)
         self.action_space = MultiBinary(9)
-        self.game = retro.make(game="IceClimber-Nes",state="Level1",use_restricted_actions=retro.Actions.FILTERED)
+        if(record):
+            self.game = retro.make(game="IceClimber-Nes",state="Level1",use_restricted_actions=retro.Actions.FILTERED, record='./recordings/')
+        else:
+            self.game = retro.make(game="IceClimber-Nes",state="Level1",use_restricted_actions=retro.Actions.FILTERED)
 
         # for rewards
         self.height3 = True
@@ -56,7 +59,7 @@ class IceClimber():
         elif(info["height"] == 7 and self.height6):
             reward = 20
             self.height6 = False
-        elif(info["height"] > 9 and self.bonus): #omg i made him give up too early
+        elif(info["height"] > 20 and self.bonus): #omg i made him give up too early
             reward = 100
             self.bonus = False
         else:
@@ -121,7 +124,7 @@ def optimize_agent(trial):
         env = VecFrameStack(env,4,channels_order='last')
 
         model = PPO('CnnPolicy',env,verbose=0,**model_params)
-        model.learn(total_timesteps=10000)
+        model.learn(total_timesteps=30000)
         mean_reward, _ = evaluate_policy(model, env, n_eval_episodes=5)
         env.close()
 
@@ -160,12 +163,12 @@ if __name__ == "__main__":
     experiment.optimize(optimize_agent,n_trials=10,n_jobs=1)
     model_params = experiment.best_params
     model_params["n_steps"] = math.floor(model_params["n_steps"] / 64) * 64 #needs to be div by 64
-    callback = LogCallback(check_freq=10000, save_path="./checkpoints/")
+    callback = LogCallback(check_freq=25000, save_path="./checkpoints/")
 
     env = IceClimber()
     env = DummyVecEnv([lambda:env])
     env = VecFrameStack(env,4,channels_order='last')
     model = PPO('CnnPolicy', env, verbose=1, **model_params)
     model.load('bestmodel')
-    model.learn(total_timesteps=200000,callback=callback)
+    model.learn(total_timesteps=1000000,callback=callback)
     model.save('finalmodel')
