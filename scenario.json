@@ -9,7 +9,7 @@
   "reward": {
     "variables": {
       "height": {
-        "reward": 1.0
+        "reward": 10.0
       }
     }
   }
